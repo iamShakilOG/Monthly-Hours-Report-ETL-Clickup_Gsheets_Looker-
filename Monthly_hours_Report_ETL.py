@@ -123,8 +123,9 @@ def export_df_to_sheet(client: gspread.Client, sheet_url: str, tab_name: str, df
     # Ensure JSON-serializable values for Google Sheets API
     df_clean = df.copy()
     df_clean = df_clean.replace([pd.NA, pd.NaT, float("inf"), float("-inf")], "")
-    df_clean = df_clean.applymap(
-        lambda x: x.strftime("%Y-%m-%d") if hasattr(x, "strftime") else x
+    # pandas 3.0 removed DataFrame.applymap; use per-column map for compatibility
+    df_clean = df_clean.apply(
+        lambda col: col.map(lambda x: x.strftime("%Y-%m-%d") if hasattr(x, "strftime") else x)
     )
 
     ws.update([df_clean.columns.values.tolist()] + df_clean.values.tolist())
