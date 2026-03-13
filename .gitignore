@@ -1,0 +1,20 @@
+# Secrets
+.env
+*.env
+*service_account*.json
+*credential*.json
+hip-lightning-451508-e5-c80ef62ddcea.json
+
+# Logs
+logs/
+*.log
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# OS
+.DS_Store
+Thumbs.db
