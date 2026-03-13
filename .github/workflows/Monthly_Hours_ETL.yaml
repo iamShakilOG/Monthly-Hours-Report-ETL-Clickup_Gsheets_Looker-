@@ -1,0 +1,44 @@
+name: Monthly Hours Report ETL
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Runs every Monday at 08:00 UTC
+    - cron: '0 8 * * 1'
+
+jobs:
+  run-etl:
+    runs-on: ubuntu-latest
+    env:
+      GOOGLE_CREDS_FILE: ./service_account.json
+      PROJECT_SHEET_KEY: ${{ secrets.PROJECT_SHEET_KEY }}
+      PROJECT_TAB: ${{ secrets.PROJECT_TAB }}
+      INTERNAL_LOG_SHEET_KEY: ${{ secrets.INTERNAL_LOG_SHEET_KEY }}
+      INTERNAL_LOG_TAB: ${{ secrets.INTERNAL_LOG_TAB }}
+      CLICKUP_API_TOKEN: ${{ secrets.CLICKUP_API_TOKEN }}
+      CLICKUP_LIST_ID: ${{ secrets.CLICKUP_LIST_ID }}
+      OUTPUT_SHEET_URL: ${{ secrets.OUTPUT_SHEET_URL }}
+      PROJECT_REPORT_TAB: ${{ secrets.PROJECT_REPORT_TAB }}
+      MERGED_REPORT_TAB: ${{ secrets.MERGED_REPORT_TAB }}
+      LOG_LEVEL: INFO
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Write service account file
+        run: |
+          cat <<'EOF' > service_account.json
+          ${{ secrets.GOOGLE_CREDS_JSON }}
+          EOF
+      - name: Run ETL
+        run: |
+          python Monthly_hours_Report_ETL.py
