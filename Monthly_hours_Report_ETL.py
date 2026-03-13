@@ -120,8 +120,14 @@ def export_df_to_sheet(client: gspread.Client, sheet_url: str, tab_name: str, df
             ws.update([[]])
         logger.warning(f"Tab {tab_name} updated with empty dataset")
         return
+    # Ensure JSON-serializable values for Google Sheets API
+    df_clean = df.copy()
+    df_clean = df_clean.replace([pd.NA, pd.NaT, float("inf"), float("-inf")], "")
+    df_clean = df_clean.applymap(
+        lambda x: x.strftime("%Y-%m-%d") if hasattr(x, "strftime") else x
+    )
 
-    ws.update([df.columns.values.tolist()] + df.values.tolist())
+    ws.update([df_clean.columns.values.tolist()] + df_clean.values.tolist())
     logger.info(f"Tab {tab_name} updated successfully")
 
 
